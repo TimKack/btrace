@@ -431,10 +431,14 @@ abstract class Client implements CommandListener {
                 ClassCache cc = ClassCache.getInstance();
                 for (Class c : inst.getAllLoadedClasses()) {
                     if (c != null) {
-                        cc.get(c);
+                    	try {
+                        cc.get(c);                       
                         if (inst.isModifiableClass(c) &&  isCandidate(c)) {
                             debugPrint("candidate " + c + " added");
                             list.add(c);
+                        }
+                        catch (StackOverflowError) {
+                        		debugPrint("candidate " + c + " throws StackOverflowError. Not added");
                         }
                     }
                 }
