@@ -26,7 +26,7 @@
 package com.sun.btrace.runtime.instr;
 
 import com.sun.btrace.org.objectweb.asm.*;
-import com.sun.btrace.util.LocalVariableHelper;
+import com.sun.btrace.runtime.MethodInstrumentorHelper;
 
 
 /**
@@ -40,9 +40,9 @@ import com.sun.btrace.util.LocalVariableHelper;
 public class LineNumberInstrumentor extends MethodInstrumentor {
     private int lastLine;
 
-    public LineNumberInstrumentor(LocalVariableHelper mv, String parentClz, String superClz,
-        int access, String name, String desc) {
-        super(mv, parentClz, superClz, access, name, desc);
+    public LineNumberInstrumentor(ClassLoader cl, MethodVisitor mv, MethodInstrumentorHelper mHelper,
+                                    String parentClz, String superClz, int access, String name, String desc) {
+        super(cl, mv, mHelper, parentClz, superClz, access, name, desc);
     }
 
     @Override
