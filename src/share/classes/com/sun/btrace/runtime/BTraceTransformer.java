@@ -29,9 +29,9 @@ import com.sun.btrace.DebugSupport;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -41,7 +41,6 @@ import java.util.regex.Pattern;
  * When a class is to be transformed all the registered {@linkplain BTraceProbe} instances are
  * asked for the appropriate instrumentation. When there are no registered probes or none of
  * the registered probes is able to instrument the class it will not be transformed.
- * </p>
  *
  * @since 1.3.5
  * @author Jaroslav Bachorik
@@ -131,7 +130,7 @@ public final class BTraceTransformer implements ClassFileTransformer {
         }
     }
     private final DebugSupport debug;
-    private final Collection<BTraceProbe> probes = new LinkedList<>();
+    private final Collection<BTraceProbe> probes = new ArrayList<>(3);
     private final Filter filter = new Filter();
 
     public BTraceTransformer(DebugSupport d) {

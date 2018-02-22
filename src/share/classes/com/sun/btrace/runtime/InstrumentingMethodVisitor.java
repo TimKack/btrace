@@ -35,7 +35,7 @@ import java.util.*;
  * recomputing stackmap frames as necessary. It also provides an API for downstream
  * visitors to hint insertion of stackmap frames at required locations.
  */
-class InstrumentingMethodVisitor extends MethodVisitor implements MethodInstrumentorHelper {
+public final class InstrumentingMethodVisitor extends MethodVisitor implements MethodInstrumentorHelper {
     private static final Object TOP_EXT = -2;
 
     private static final class LocalVarSlot {
@@ -391,12 +391,7 @@ class InstrumentingMethodVisitor extends MethodVisitor implements MethodInstrume
                 break;
             }
             case F_SAME: {
-                boolean isEmptyStack = this.stack.isEmpty();
                 this.stack.reset();
-                if (isEmptyStack && this.locals.size() == argsSize && this.newLocals.isEmpty()) {
-                    super.visitFrame(type, nLocal, local, nStack, stack);
-                    return;
-                }
                 break;
             }
             case F_SAME1: {
@@ -443,7 +438,7 @@ class InstrumentingMethodVisitor extends MethodVisitor implements MethodInstrume
             }
         }
         localsArr = Arrays.copyOf(localsArr, localsArr.length - off);
-        Object[] tmpStack = this.stack.toArray();
+        Object[] tmpStack = this.stack.toArray(true);
 
         super.visitFrame(F_NEW, localsArr.length, localsArr, tmpStack.length, tmpStack);
     }
