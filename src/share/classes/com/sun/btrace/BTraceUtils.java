@@ -960,6 +960,78 @@ public class BTraceUtils {
     }
 
     /**
+     * Prints the elements of the given array as comma
+     * separated line bounded by '[' and ']'.
+     * @since 1.3.11
+     */
+    public static void printArray(int[] array) {
+        println(Arrays.toString(array));
+    }
+
+    /**
+     * Prints the elements of the given array as comma
+     * separated line bounded by '[' and ']'.
+     * @since 1.3.11
+     */
+    public static void printArray(long[] array) {
+        println(Arrays.toString(array));
+    }
+
+    /**
+     * Prints the elements of the given array as comma
+     * separated line bounded by '[' and ']'.
+     * @since 1.3.11
+     */
+    public static void printArray(float[] array) {
+        println(Arrays.toString(array));
+    }
+
+    /**
+     * Prints the elements of the given array as comma
+     * separated line bounded by '[' and ']'.
+     * @since 1.3.11
+     */
+    public static void printArray(double[] array) {
+        println(Arrays.toString(array));
+    }
+
+    /**
+     * Prints the elements of the given array as comma
+     * separated line bounded by '[' and ']'.
+     * @since 1.3.11
+     */
+    public static void printArray(boolean[] array) {
+        println(Arrays.toString(array));
+    }
+
+    /**
+     * Prints the elements of the given array as comma
+     * separated line bounded by '[' and ']'.
+     * @since 1.3.11
+     */
+    public static void printArray(char[] array) {
+        println(Arrays.toString(array));
+    }
+
+    /**
+     * Prints the elements of the given array as comma
+     * separated line bounded by '[' and ']'.
+     * @since 1.3.11
+     */
+    public static void printArray(byte[] array) {
+        println(Arrays.toString(array));
+    }
+
+    /**
+     * Prints the elements of the given array as comma
+     * separated line bounded by '[' and ']'.
+     * @since 1.3.11
+     */
+    public static void printArray(short[] array) {
+        println(Arrays.toString(array));
+    }
+
+    /**
      * Print all instance fields of an object as name-value
      * pairs. Includes the inherited fields as well.
      *

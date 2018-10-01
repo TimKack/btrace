@@ -24,6 +24,7 @@ package traces;
 
 import com.sun.btrace.annotations.BTrace;
 import static com.sun.btrace.BTraceUtils.*;
+import com.sun.btrace.annotations.OnMethod;
 
 /**
  *
@@ -39,5 +40,10 @@ public class ProbeArgsTest {
         println("arg1=" + Sys.$("arg1"));
         println("arg2=" + Sys.$("arg2"));
         println("arg3=" + Sys.$("arg3"));
+    }
+
+    @OnMethod(clazz = "${clzParam}", method = "${mthdParam}")
+    public static void trace() {
+        println("matching probe");
     }
 }

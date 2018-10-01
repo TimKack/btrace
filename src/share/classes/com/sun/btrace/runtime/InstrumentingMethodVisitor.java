@@ -22,6 +22,7 @@
 
 package com.sun.btrace.runtime;
 
+import com.sun.btrace.DebugSupport;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -1179,7 +1180,7 @@ public final class InstrumentingMethodVisitor extends MethodVisitor implements M
 
     @Override
     public void visitTryCatchBlock(Label start, Label end, Label handler, String exception) {
-        tryCatchHandlerMap.put(start, handler);
+        addTryCatchHandler(start, handler);
         super.visitTryCatchBlock(start, end, handler, exception);
     }
 
@@ -1280,6 +1281,11 @@ public final class InstrumentingMethodVisitor extends MethodVisitor implements M
     }
 
     @Override
+    public void addTryCatchHandler(Label start, Label handler) {
+        tryCatchHandlerMap.put(start, handler);
+    }
+
+    @Override
     public int storeAsNew() {
         Type t = fromSlotType(peekFromStack());
         int idx = newVar(t);
@@ -1340,6 +1346,8 @@ public final class InstrumentingMethodVisitor extends MethodVisitor implements M
                             localsArr[off] = TOP_EXT;
                             idx++;
                         }
+                    } else {
+                        System.err.println("***");
                     }
                 }
                 idx++;
@@ -1390,10 +1398,10 @@ public final class InstrumentingMethodVisitor extends MethodVisitor implements M
 
     private int remap(int var, int size) {
         int mappedVar = map(var);
-        if (mappedVar == 0) {
+        if (mappedVar >= 0) {
             int offset = var - argsSize;
-            var = newVarIdx(size);
-            setMapping(offset, var, size -1);
+            var = (mappedVar == 0) ? newVarIdx(size) : -mappedVar;
+            setMapping(offset, var, size - 1);
             mappedVar = var;
         }
         var = mappedVar == Integer.MIN_VALUE ? 0 : Math.abs(mappedVar);
@@ -1414,7 +1422,7 @@ public final class InstrumentingMethodVisitor extends MethodVisitor implements M
             }
             return mapping[idx];
         }
-        return var == 0 ? Integer.MIN_VALUE : var;
+        return var == 0 ? Integer.MIN_VALUE : -var;
     }
 
     private Object peekFromStack() {
@@ -1460,6 +1468,10 @@ public final class InstrumentingMethodVisitor extends MethodVisitor implements M
         }
         if (slotType == TOP) {
             return Constants.TOP_TYPE;
+        }
+        if (slotType instanceof Integer) {
+            DebugSupport.warning("Unknown slot type: " + slotType);
+            return Constants.OBJECT_TYPE;
         }
         return slotType != null ? Type.getObjectType((String)slotType) : Constants.OBJECT_TYPE;
     }

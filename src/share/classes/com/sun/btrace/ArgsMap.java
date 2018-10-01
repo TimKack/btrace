@@ -24,18 +24,27 @@ package com.sun.btrace;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A simple argument map wrapper allowing indexed access
  */
-public final class ArgsMap implements Iterable<Map.Entry<String, String>>{
+public final class ArgsMap implements Iterable<Map.Entry<String, String>> {
+    private static final class PatternSingleton {
+        // lazy initialization trick
+        // do not compile the pattern until it is actually requested
+        private static final Pattern INSTANCE = Pattern.compile("\\$\\{(.*?)\\}");
+    }
     private final LinkedHashMap<String, String> map;
+    private final DebugSupport debug;
 
-    public ArgsMap(Map<String, String> args) {
+    public ArgsMap(Map<String, String> args, DebugSupport debug) {
         this.map = args != null ? new LinkedHashMap<>(args) : new LinkedHashMap<String, String>();
+        this.debug = debug;
     }
 
-    public ArgsMap(String[] argLine) {
+    public ArgsMap(String[] argLine, DebugSupport debug) {
         this.map = new LinkedHashMap<>();
         if (argLine != null) {
                 for (String arg : argLine) {
@@ -47,14 +56,16 @@ public final class ArgsMap implements Iterable<Map.Entry<String, String>>{
                 }
             }
         }
+        this.debug = debug;
     }
 
     public ArgsMap() {
-        this((Map<String, String>)null);
+        this((Map<String, String>)null, new DebugSupport(SharedSettings.GLOBAL));
     }
 
-    public ArgsMap(int initialCapacity) {
+    public ArgsMap(int initialCapacity, DebugSupport debug) {
         this.map = new LinkedHashMap<>(initialCapacity);
+        this.debug = debug;
     }
 
     public String get(String key) {
@@ -107,5 +118,42 @@ public final class ArgsMap implements Iterable<Map.Entry<String, String>>{
     @Override
     public int hashCode() {
         return map.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ArgsMap{" + "map=" + map + ", debug=" + debug + '}';
+    }
+
+    public static ArgsMap merge(ArgsMap ... maps) {
+        DebugSupport debug = null;
+        Map<String, String> propMap = new LinkedHashMap<>();
+        for (ArgsMap map : maps) {
+            if (debug == null) {
+                debug = map.debug;
+            }
+            propMap.putAll(map.map);
+        }
+        return new ArgsMap(propMap, debug);
+    }
+
+    public String template(String value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.isEmpty()) {
+            return value;
+        }
+
+        Matcher matcher = PatternSingleton.INSTANCE.matcher(value);
+        StringBuffer buffer = new StringBuffer(value.length());
+
+        while (matcher.find()) {
+            String val = get(matcher.group(1));
+            matcher.appendReplacement(buffer, val != null ? val : "$0");
+        }
+        matcher.appendTail(buffer);
+
+        return buffer.toString();
     }
 }

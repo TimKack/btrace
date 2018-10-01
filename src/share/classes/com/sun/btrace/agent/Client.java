@@ -36,6 +36,7 @@ import java.io.IOException;
 import com.sun.btrace.org.objectweb.asm.ClassReader;
 import com.sun.btrace.org.objectweb.asm.ClassWriter;
 import com.sun.btrace.BTraceRuntime;
+import com.sun.btrace.BTraceUtils;
 import com.sun.btrace.CommandListener;
 import com.sun.btrace.comm.ErrorCommand;
 import com.sun.btrace.comm.ExitCommand;
@@ -276,7 +277,7 @@ abstract class Client implements CommandListener {
         ArgsMap args = instr.getArguments();
         this.btraceCode = instr.getCode();
         try {
-            probe = load(btraceCode, canLoadPack);
+            probe = load(btraceCode, ArgsMap.merge(argsMap, args), canLoadPack);
             if (probe == null) {
                 return null;
             }
@@ -315,12 +316,18 @@ abstract class Client implements CommandListener {
 
         onCommand(new OkayCommand());
 
+        boolean entered = false;
         try {
+            entered = BTraceRuntime.enter(runtime);
             return probe.register(runtime, transformer);
         } catch (Throwable th) {
             debugPrint(th);
             errorExit(th);
             return null;
+        } finally {
+            if (entered) {
+                BTraceRuntime.leave();
+            }
         }
     }
 
@@ -414,10 +421,10 @@ abstract class Client implements CommandListener {
     }
 
     // Internals only below this point
-    private BTraceProbe load(byte[] buf, boolean canLoadPack) {
+    private BTraceProbe load(byte[] buf, ArgsMap args, boolean canLoadPack) {
         BTraceProbeFactory f = new BTraceProbeFactory(settings, canLoadPack);
         debugPrint("loading BTrace class");
-        BTraceProbe cn = f.createProbe(buf);
+        BTraceProbe cn = f.createProbe(buf, args);
 
         if (cn != null) {
             if (isDebug()) {
