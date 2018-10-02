@@ -25,30 +25,9 @@
 
 package com.sun.btrace.agent;
 
-import com.sun.btrace.ArgsMap;
-import com.sun.btrace.runtime.BTraceProbeFactory;
-import com.sun.btrace.runtime.ClassCache;
-import com.sun.btrace.runtime.ClassInfo;
-import com.sun.btrace.runtime.BTraceTransformer;
-import com.sun.btrace.DebugSupport;
-import com.sun.btrace.SharedSettings;
-import java.io.IOException;
-import com.sun.btrace.org.objectweb.asm.ClassReader;
-import com.sun.btrace.org.objectweb.asm.ClassWriter;
-import com.sun.btrace.BTraceRuntime;
-import com.sun.btrace.BTraceUtils;
-import com.sun.btrace.CommandListener;
-import com.sun.btrace.comm.ErrorCommand;
-import com.sun.btrace.comm.ExitCommand;
-import com.sun.btrace.comm.InstrumentCommand;
-import com.sun.btrace.comm.OkayCommand;
-import com.sun.btrace.comm.RenameCommand;
-import com.sun.btrace.PerfReader;
-import com.sun.btrace.comm.RetransformationStartNotification;
-import com.sun.btrace.runtime.*;
-import com.sun.btrace.util.templates.impl.MethodTrackingExpander;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.instrument.Instrumentation;
@@ -63,6 +42,32 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.sun.btrace.ArgsMap;
+import com.sun.btrace.BTraceRuntime;
+import com.sun.btrace.CommandListener;
+import com.sun.btrace.DebugSupport;
+import com.sun.btrace.PerfReader;
+import com.sun.btrace.SharedSettings;
+import com.sun.btrace.comm.ErrorCommand;
+import com.sun.btrace.comm.ExitCommand;
+import com.sun.btrace.comm.InstrumentCommand;
+import com.sun.btrace.comm.OkayCommand;
+import com.sun.btrace.comm.RenameCommand;
+import com.sun.btrace.comm.RetransformationStartNotification;
+import com.sun.btrace.org.objectweb.asm.ClassReader;
+import com.sun.btrace.org.objectweb.asm.ClassWriter;
+import com.sun.btrace.runtime.BTraceProbe;
+import com.sun.btrace.runtime.BTraceProbeFactory;
+import com.sun.btrace.runtime.BTraceProbePersisted;
+import com.sun.btrace.runtime.BTraceTransformer;
+import com.sun.btrace.runtime.ClassCache;
+import com.sun.btrace.runtime.ClassFilter;
+import com.sun.btrace.runtime.ClassInfo;
+import com.sun.btrace.runtime.InstrumentUtils;
+import com.sun.btrace.runtime.Instrumentor;
+import com.sun.btrace.util.templates.impl.MethodTrackingExpander;
+
 import sun.reflect.annotation.AnnotationParser;
 import sun.reflect.annotation.AnnotationType;
 
@@ -461,21 +466,21 @@ abstract class Client implements CommandListener {
                 debugPrint("filtering loaded classes");
                 ClassCache cc = ClassCache.getInstance();
                 for (Class c : inst.getAllLoadedClasses()) {
-                    if (c != null) {
-                    	try {
-                        cc.get(c);                       
-                        if (inst.isModifiableClass(c) &&  isCandidate(c)) {
-                            debugPrint("candidate " + c + " added");
-                            list.add(c);
-                        }
-                        }
-                        catch (StackOverflowError s) {
-                        		debugPrint("candidate " + c + " throws StackOverflowError. Not added");
-                        }
+                  if (c != null) {
+                    // TODO: This needs to be converted to a loadable blacklist
+			if (c.getName().equals("org.slf4j.impl.StaticLoggerBinder")) {
+                      debugPrint( "Not adding " + c.getName() + " because it throws StackOverflowError" );
+                      continue;
                     }
-                }
+                    cc.get(c);                       
+                    if (inst.isModifiableClass(c) &&  isCandidate(c)) {
+                      debugPrint("candidate " + c + " added");
+                      list.add(c);
+                    }   
+                  }
+                }   
                 list.trimToSize();
-                int size = list.size();
+                int size  = list.size();
                 if (size > 0) {
                     Class[] classes = new Class[size];
                     list.toArray(classes);
