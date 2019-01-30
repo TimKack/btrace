@@ -468,8 +468,9 @@ abstract class Client implements CommandListener {
                 for (Class c : inst.getAllLoadedClasses()) {
                   if (c != null) {
                     // TODO: This needs to be converted to a loadable blacklist
-			if (c.getName().equals("org.slf4j.impl.StaticLoggerBinder")) {
-                      debugPrint( "Not adding " + c.getName() + " because it throws StackOverflowError" );
+			if (c.getName().equals("org.slf4j.impl.StaticLoggerBinder") ||
+			    c.getName().equals("org.apache.catalina.loader.JdbcLeakPrevention")) {
+                      debugPrint( "Not adding " + c.getName() + " because it causes instrumentation problems" );
                       continue;
                     }
                     cc.get(c);                       

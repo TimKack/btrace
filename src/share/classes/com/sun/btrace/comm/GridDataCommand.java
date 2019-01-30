@@ -100,7 +100,7 @@ public class GridDataCommand extends DataCommand {
         Map<Integer, Integer> columnWidth = new LinkedHashMap<>();
         for (Object[] obj : objects) {
             for (int column = 0; column < obj.length; ++column) {
-                int length = obj[column].toString().length();
+                int length = (obj[column] != null) ? obj[column].toString().length() : 0;
                 Integer width = 0;
                 if (columnWidth.containsKey(column)) {
                     width = columnWidth.get(column);
