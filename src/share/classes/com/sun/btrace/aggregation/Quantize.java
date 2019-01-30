@@ -156,14 +156,14 @@ class Quantize implements AggregationValue {
 
     private static long getBucketLabel(int index) {
         if (index == ZERO_INDEX) {
-            return 0;
+            return 0L;
         } else if (index == 0) {
             return Long.MIN_VALUE;
         } else if (index > ZERO_INDEX) {
-            index = index - ZERO_INDEX - 1;
-            return 1 << index;
+            index = index - ZERO_INDEX - 1L;
+            return 1L << index;
         } else {
-            index = ZERO_INDEX - index - 1;
+            index = ZERO_INDEX - index - 1L;
             return 0 - (1 << index);
         }
     }
